@@ -5,8 +5,6 @@ log:
 storage:
     cache:
         blobdescriptor: inmemory
-    filesystem:
-        rootdirectory: /repository
 http:
     addr: :80
     headers:

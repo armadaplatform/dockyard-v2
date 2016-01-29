@@ -1,16 +1,11 @@
-# dockyard
+# dockyard-v2
 
-`dockyard` service contains armadized [docker registry](https://github.com/docker/docker-registry) - a place to store
+`dockyard-v2` service contains armadized [Docker Registry 2.0](https://github.com/docker/distribution) - a place to store
 your docker container images.
-It is accompanied by nginx server which allows adding authentication layer and connection encryption with SSL.
-
-Currently it still uses the "old" (python) registry implementation.
-Switch to ["Docker registry 2.0"](https://docs.docker.com/registry/) is planned.
-
 
 # Building the service.
 
-    armada build dockyard
+    armada build dockyard-v2
 
 
 # Running the service.
@@ -25,14 +20,14 @@ The service supports two storage options:
     To ensure persistent storage it should be mapped to some folder on the host machine,
     e.g. `/var/opt/dockyard.initech.com`:
 
-        armada run dockyard -v /var/opt/dockyard.initech.com:/repository
+        armada run dockyard-v2 -v /var/opt/dockyard.initech.com:/repository
 
 
 2. Registry stored in AWS S3.
 
     You have to provide S3 bucket path with suitable access and secret keys:
 
-        armada run dockyard -e "REPOSITORY_PATH=s3:///com-initech-dockyard/" "AWS_ACCESS_KEY=..." "AWS_ACCESS_SECRET=..."
+        armada run dockyard-v2 -e "REPOSITORY_PATH=s3://com-initech-dockyard/" "AWS_ACCESS_KEY=..." "AWS_ACCESS_SECRET=..."
 
     Beware not to use dot character in your bucket name (e.g. `com.initech.dockyard`). Amazon's S3 SSL certificate
     is valid only for first-level subdomains of `s3.amazonaws.com` through which API calls are made.
@@ -48,7 +43,7 @@ The first option may be convenient for local development registry, but in produc
 To run dockyard that way we have to provide correct SSL certificate.
 Assuming we have proper keys in `/etc/ssl/dockyard.initech.com` directory we can run:
 
-    armada run dockyard ... -v /etc/ssl/dockyard.initech.com:/ssl_keys -e "HTTPS_DOMAIN=dockyard.initech.com" "SSL_CRT_FILE=/ssl_keys/dockyard.initech.com.crt" "SSL_KEY_FILE=/ssl_keys/dockyard.initech.com.key"
+    armada run dockyard-v2 ... -v /etc/ssl/dockyard.initech.com:/ssl_keys -e "HTTPS_DOMAIN=dockyard.initech.com" "SSL_CRT_FILE=/ssl_keys/dockyard.initech.com.crt" "SSL_KEY_FILE=/ssl_keys/dockyard.initech.com.key"
 
 
 ### Basic HTTP authentication.
@@ -56,7 +51,7 @@ Assuming we have proper keys in `/etc/ssl/dockyard.initech.com` directory we can
 When using HTTPS, we can also add basic HTTP authentication, so that only users knowing proper credentials can access it.
 In addition to other parameters we can run:
 
-    armada run dockyard ... -e "HTTP_AUTH_USER=admin" "HTTP_AUTH_PASSWORD=secret!"
+    armada run dockyard-v2 ... -e "HTTP_AUTH_USER=admin" "HTTP_AUTH_PASSWORD=secret!"
 
 This type of authentication can only be used with dockyard with HTTPS configured.
 
@@ -65,7 +60,7 @@ This type of authentication can only be used with dockyard with HTTPS configured
 
 If you want to run dockyard in read only mode you can add parameter `READ_ONLY`:
 
-    armada run dockyard ... -e "READ_ONLY=1"
+    armada run dockyard-v2 ... -e "READ_ONLY=1"
 
 It can be useful to have 2 dockyards running. One with authenticated read/write access for the developers, and the other
 read only one for your customers.
@@ -82,6 +77,7 @@ E.g.:
         "REPOSITORY_PATH": "s3:///com-initech-dockyard/",
         "AWS_ACCESS_KEY": "xxx",
         "AWS_ACCESS_SECRET": "xxx",
+        "AWS_REGION": "us-east-1",
 
         "HTTPS_DOMAIN": "dockyard.initech.com",
         "SSL_CRT_FILE": "ssl_keys/dockyard.initech.com.crt",

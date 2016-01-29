@@ -1,4 +1,3 @@
-import json
 import os
 import subprocess
 import sys
@@ -6,55 +5,39 @@ from urllib.parse import urlparse
 
 import hermes
 import yaml
-from  nested_dict import nested_dict as nested_dict
+from nested_dict import nested_dict
 
-REGISTRY_CONFIG_PATH = '/etc/docker/registry/config.yml'
+from config.config_json import get_config_json
+
+REGISTRY_CONFIG_PATH = '/tmp/config.yml'
 DEFAULT_STORAGE_PATH = '/repository'
 
 
-# configdict = lambda x: defaultdict(configdict, x)
-# cd = lambda: defaultdict(cd)
-
-
 def parse_base_registry_config():
-    with open(os.path.join(os.path.dirname(__file__), '..', 'config', 'base_registry_config.yml')) as f:
+    with open('config/base_registry_config.yml') as f:
         return nested_dict(yaml.load(f))
 
 
 def main():
-    command = "/go/bin/registry {}".format(REGISTRY_CONFIG_PATH).split()
-    config = hermes.get_config('config.json')
-    base_config = parse_base_registry_config()
-    from pprint import pprint
-    new_config = nested_dict(base_config)
-    new_config['aa']['bb']['cc'] = 'test'
-    pprint(new_config)
-    out_config = new_config.to_dict()
-    pprint(out_config)
-    print(yaml.dump(out_config, default_flow_style=False))
+    registry_config = parse_base_registry_config()
+    ssl_crt_file = get_config_json('SSL_CRT_FILE')
+    ssl_key_file = get_config_json('SSL_KEY_FILE')
+    if ssl_crt_file:
+        registry_config['http']['tls']['certificate'] = hermes.get_config_file_path(ssl_crt_file)
+    if ssl_key_file:
+        registry_config['http']['tls']['key'] = hermes.get_config_file_path(ssl_key_file)
 
-    sys.exit(0)
-    env = {}
-    if 'SSL_CRT_FILE' in config:
-        env['REGISTRY_HTTP_TLS_CERTIFICATE'] = hermes.get_config_file_path(config['SSL_CRT_FILE'])
-    if 'SSL_KEY_FILE' in config:
-        env['REGISTRY_HTTP_TLS_KEY'] = hermes.get_config_file_path(config['SSL_KEY_FILE'])
-
-    if 'HTTP_AUTH_USER' in config and 'HTTP_AUTH_PASSWORD' in config:
-        user = config['HTTP_AUTH_USER']
-        password = config['HTTP_AUTH_PASSWORD']
+    if get_config_json('HTTP_AUTH_USER') and get_config_json('HTTP_AUTH_PASSWORD'):
+        user = get_config_json('HTTP_AUTH_USER')
+        password = get_config_json('HTTP_AUTH_PASSWORD')
         subprocess.check_output('htpasswd -Bbn "{}" "{}" > /tmp/htpasswd'.format(user, password), shell=True)
-        env['REGISTRY_AUTH'] = 'htpasswd'
-        env['REGISTRY_AUTH_HTPASSWD_REALM'] = 'Registry Realm'
-        env['REGISTRY_AUTH_HTPASSWD_PATH'] = '/tmp/htpasswd'
+        registry_config['auth']['htpasswd']['realm'] = 'Registry Realm'
+        registry_config['auth']['htpasswd']['path'] = '/tmp/htpasswd'
 
-    if config.get('READ_ONLY'):
-        # env['REGISTRY_STORAGE_MAINTENANCE'] = 'readonly'
-        env['REGISTRY_STORAGE_MAINTENANCE_READONLY'] = 'true'
-        # env['REGISTRY_STORAGE_MAINTENANCE_READONLY'] = '{"enabled": "true"}'
-        env['REGISTRY_STORAGE_MAINTENANCE_READONLY_ENABLED'] = 'true'
+    if get_config_json('READ_ONLY'):
+        registry_config['storage']['maintenance']['readonly']['enabled'] = True
 
-    storage_path = config.get('REPOSITORY_PATH') or DEFAULT_STORAGE_PATH
+    storage_path = get_config_json('REPOSITORY_PATH') or DEFAULT_STORAGE_PATH
     parsed_storage_path = urlparse(storage_path)
     if parsed_storage_path.scheme == 's3':
         # Fix s3 schemas with too many "/":
@@ -62,21 +45,27 @@ def main():
             parsed_storage_path = urlparse(storage_path.replace('s3:///', 's3://'))
         s3_bucket = parsed_storage_path.netloc
         s3_directory = parsed_storage_path.path
-        env['REGISTRY_STORAGE'] = 's3'
-        env['REGISTRY_STORAGE_S3_BUCKET'] = s3_bucket
-        env['REGISTRY_STORAGE_S3_ROOTDIRECTORY'] = s3_directory
-        env['REGISTRY_STORAGE_S3_REGION'] = config['REGISTRY_STORAGE_S3_REGION']
-        env['REGISTRY_STORAGE_S3_ACCESSKEY'] = config['AWS_ACCESS_KEY']
-        env['REGISTRY_STORAGE_S3_SECRETKEY'] = config['AWS_ACCESS_SECRET']
+        registry_config['storage']['s3'] = {
+            'bucket': s3_bucket,
+            'rootdirectory': s3_directory,
+            'region': get_config_json('AWS_REGION'),
+            'accesskey': get_config_json('AWS_ACCESS_KEY'),
+            'secretkey': get_config_json('AWS_ACCESS_SECRET'),
+            'secure': True
+        }
     else:
         if not os.path.exists(storage_path):
             os.makedirs(storage_path)
         os.chmod(storage_path, 0o777)
-        env['REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY'] = storage_path
+        registry_config['storage']['filesystem']['rootdirectory'] = storage_path
 
-    print(json.dumps(env, indent=4))
+    saved_dict = registry_config.to_dict()
+    with open(REGISTRY_CONFIG_PATH, 'w') as f:
+        f.write(yaml.dump(saved_dict, default_flow_style=False))
     sys.stdout.flush()
-    os.execve(command[0], command, env)
+
+    command = "/go/bin/registry {}".format(REGISTRY_CONFIG_PATH).split()
+    os.execv(command[0], command)
 
 
 if __name__ == '__main__':

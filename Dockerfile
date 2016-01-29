@@ -9,11 +9,9 @@ RUN cd /tmp && chmod +x install_go.sh && sync && ./install_go.sh
 ADD scripts/install_docker_registry.sh /tmp/
 RUN cd /tmp && chmod +x install_docker_registry.sh && sync && ./install_docker_registry.sh
 
-RUN pip3 install -U pyyaml
+RUN pip3 install -U pyyaml nested_dict
 
 ADD . /opt/dockyard-v2
 ADD ./supervisor/* /etc/supervisor/conf.d/
-
-#RUN sed 's/80/5000/' /etc/supervisor/conf.d/register_in_service_discovery.conf -i
 
 EXPOSE 80
