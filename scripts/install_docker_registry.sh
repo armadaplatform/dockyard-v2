@@ -24,6 +24,3 @@ make PREFIX=/go clean binaries
 
 mkdir -p /etc/docker/registry/
 cp cmd/registry/config-dev.yml /etc/docker/registry/config.yml
-
-mkdir -p /var/lib/registry
-chmod 777 /var/lib/registry

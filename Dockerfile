@@ -9,10 +9,11 @@ RUN cd /tmp && chmod +x install_go.sh && sync && ./install_go.sh
 ADD scripts/install_docker_registry.sh /tmp/
 RUN cd /tmp && chmod +x install_docker_registry.sh && sync && ./install_docker_registry.sh
 
+RUN pip3 install -U pyyaml
+
 ADD . /opt/dockyard-v2
 ADD ./supervisor/* /etc/supervisor/conf.d/
 
-RUN rm -f /etc/supervisor/conf.d/update_haproxy.conf
-RUN sed 's/80/5000/' /etc/supervisor/conf.d/register_in_service_discovery.conf -i
+#RUN sed 's/80/5000/' /etc/supervisor/conf.d/register_in_service_discovery.conf -i
 
-EXPOSE 5000
+EXPOSE 80
