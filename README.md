@@ -25,9 +25,10 @@ The service supports two storage options:
 
 2. Registry stored in AWS S3.
 
-    You have to provide S3 bucket path with suitable access and secret keys:
+    You have to provide AWS region, S3 bucket path and suitable access and secret keys:
 
-        armada run dockyard-v2 -e "REPOSITORY_PATH=s3://com-initech-dockyard/" "AWS_ACCESS_KEY=..." "AWS_ACCESS_SECRET=..."
+        armada run dockyard-v2 -e "AWS_REGION=us-east-1" "REPOSITORY_PATH=s3://com-initech-dockyard/" \ 
+            "AWS_ACCESS_KEY=..." "AWS_ACCESS_SECRET=..."
 
     Beware not to use dot character in your bucket name (e.g. `com.initech.dockyard`). Amazon's S3 SSL certificate
     is valid only for first-level subdomains of `s3.amazonaws.com` through which API calls are made.
@@ -43,8 +44,36 @@ The first option may be convenient for local development registry, but in produc
 To run dockyard that way we have to provide correct SSL certificate.
 Assuming we have proper keys in `/etc/ssl/dockyard.initech.com` directory we can run:
 
-    armada run dockyard-v2 ... -v /etc/ssl/dockyard.initech.com:/ssl_keys -e "HTTPS_DOMAIN=dockyard.initech.com" "SSL_CRT_FILE=/ssl_keys/dockyard.initech.com.crt" "SSL_KEY_FILE=/ssl_keys/dockyard.initech.com.key"
+    armada run dockyard-v2 ... -v /etc/ssl/dockyard.initech.com:/ssl_keys -e "HTTPS_DOMAIN=dockyard.initech.com" \
+        "SSL_CRT_FILE=/ssl_keys/dockyard.initech.com.crt" "SSL_KEY_FILE=/ssl_keys/dockyard.initech.com.key"
 
+#### Self-signed SSL certificates.
+
+If you do not own domain with HTTPS and still want to use dockyard behind HTTPS, you can use self-signed certificate.
+But beware, it is less secure than using trusted CA, and requires configuring every host that will access the
+Dockyard.
+
+To generate such certificate you can use this script:
+
+    DOMAIN=dockyard.initech.com
+    openssl req -newkey rsa:4096 -nodes -sha256 -keyout ${DOMAIN}.key -x509 -days 10000 -subj "/CN=${DOMAIN}" -out ${DOMAIN}.crt
+
+Now you have to put the generated .crt file on all hosts that will access the Dockyard.
+
+You can either install it for docker only, or to the entire system.
+
+To add it to docker, put it here: `/etc/docker/certs.d/${DOMAIN}/ca.crt` and restart docker.
+
+Adding it to your system differs between distributions.
+
+E.g. on Ubuntu put it to:
+`/usr/local/share/ca-certificates/${DOMAIN}.crt`
+and run:
+
+    update-ca-certificates
+
+See more information about using self-signed certificates:
+https://docs.docker.com/registry/insecure/#using-self-signed-certificate
 
 ### Basic HTTP authentication.
 
@@ -55,6 +84,20 @@ In addition to other parameters we can run:
 
 This type of authentication can only be used with dockyard with HTTPS configured.
 
+### Problem with using HTTP Dockyard with docker >= 1.7.0.
+
+Since docker version 1.7.0, it is not allowed to connect to HTTP Dockyards on other hosts than localhost.
+However, if you still want to use HTTP Dockyard and are aware of the insecurity issues with HTTP, you can use
+workaround.
+
+Run the proxy service ([armada-bind](https://github.com/armadaplatform/armada-bind)) that will expose access to remote
+dockyard on some port on your localhost:
+
+    armada run armada-bind -d armada -r dockyard-proxy -e SERVICE_ADDRESS=${REMOTE_DOCKYARD_ADDRESS_WITH_PORT} -p ${LOCAL_BIND_PORT}:80
+
+And add it to your dockyard list:
+
+    armada dockyard set my-dockyard localhost:${LOCAL_BIND_PORT}
 
 ### Read only mode.
 
