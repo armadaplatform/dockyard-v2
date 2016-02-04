@@ -9,6 +9,8 @@ http:
     addr: :80
     headers:
         X-Content-Type-Options: [nosniff]
+    debug:
+      addr: localhost:5001
 health:
   storagedriver:
     enabled: true
