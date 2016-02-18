@@ -49,7 +49,10 @@ Assuming we have proper keys in `/etc/ssl/dockyard.initech.com` directory we can
 
 #### Self-signed SSL certificates.
 
-If you do not own domain with HTTPS and still want to use dockyard behind HTTPS, you can use self-signed certificate.
+If you still want to use dockyard behind HTTPS, but you do not own domain with HTTPS or you are using docker >= v1.8.0
+and want to avoid problem with HTTP dockyards [described below](#problem-with-using-http-dockyard-with-docker--180),
+then you can use self-signed certificate.
+
 But beware, it is less secure than using trusted CA, and requires configuring every host that will access the
 Dockyard.
 
@@ -63,6 +66,7 @@ Now you have to put the generated .crt file on all hosts that will access the Do
 You can either install it for docker only, or to the entire system.
 
 To add it to docker, put it here: `/etc/docker/certs.d/${DOMAIN}/ca.crt` and restart docker.
+Make sure the armada command users have access to this file. E.g. `sudo chmod o+x /etc/docker` may be required.
 
 Adding it to your system differs between distributions.
 
@@ -72,7 +76,7 @@ and run:
 
     update-ca-certificates
 
-See more information about using self-signed certificates:
+For more information about using self-signed certificates see:
 https://docs.docker.com/registry/insecure/#using-self-signed-certificate
 
 ### Basic HTTP authentication.
@@ -84,16 +88,18 @@ In addition to other parameters we can run:
 
 This type of authentication can only be used with dockyard with HTTPS configured.
 
-### Problem with using HTTP Dockyard with docker >= 1.7.0.
+### Problem with using HTTP Dockyard with docker >= 1.8.0.
 
-Since docker version 1.7.0, it is not allowed to connect to HTTP Dockyards on other hosts than localhost.
+Since docker version 1.8.0, it is not allowed to connect to HTTP Dockyards on other hosts than localhost.
 However, if you still want to use HTTP Dockyard and are aware of the insecurity issues with HTTP, you can use
 workaround.
 
 Run the proxy service ([armada-bind](https://github.com/armadaplatform/armada-bind)) that will expose access to remote
 dockyard on some port on your localhost:
 
-    armada run armada-bind -d armada -r dockyard-proxy -e SERVICE_ADDRESS=${REMOTE_DOCKYARD_ADDRESS_WITH_PORT} -p ${LOCAL_BIND_PORT}:80
+    REMOTE_DOCKYARD_ADDRESS=insecure-dockyard.initech.com:7000
+    LOCAL_BIND_PORT=5000
+    armada run armada-bind -d armada --rename dockyard-proxy -e SERVICE_ADDRESS=${REMOTE_DOCKYARD_ADDRESS} -p ${LOCAL_BIND_PORT}:80
 
 And add it to your dockyard list:
 
