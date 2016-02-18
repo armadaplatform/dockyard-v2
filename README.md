@@ -72,7 +72,7 @@ and run:
 
     update-ca-certificates
 
-See more information about using self-signed certificates:
+For more information about using self-signed certificates see:
 https://docs.docker.com/registry/insecure/#using-self-signed-certificate
 
 ### Basic HTTP authentication.
@@ -93,7 +93,9 @@ workaround.
 Run the proxy service ([armada-bind](https://github.com/armadaplatform/armada-bind)) that will expose access to remote
 dockyard on some port on your localhost:
 
-    armada run armada-bind -d armada -r dockyard-proxy -e SERVICE_ADDRESS=${REMOTE_DOCKYARD_ADDRESS_WITH_PORT} -p ${LOCAL_BIND_PORT}:80
+    REMOTE_DOCKYARD_ADDRESS_WITH_PORT=...
+    LOCAL_BIND_PORT=...
+    armada run armada-bind -d armada --rename dockyard-proxy -e SERVICE_ADDRESS=${REMOTE_DOCKYARD_ADDRESS_WITH_PORT} -p ${LOCAL_BIND_PORT}:80
 
 And add it to your dockyard list:
 
