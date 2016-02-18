@@ -50,7 +50,7 @@ Assuming we have proper keys in `/etc/ssl/dockyard.initech.com` directory we can
 #### Self-signed SSL certificates.
 
 If you still want to use dockyard behind HTTPS, but you do not own domain with HTTPS or you are using docker >= v1.8.0
-and want to avoid problem with HTTP dockyards [described below](#problem-with-using-http-dockyard-with-docker--170),
+and want to avoid problem with HTTP dockyards [described below](#problem-with-using-http-dockyard-with-docker--180),
 then you can use self-signed certificate.
 
 But beware, it is less secure than using trusted CA, and requires configuring every host that will access the
