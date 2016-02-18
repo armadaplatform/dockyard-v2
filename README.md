@@ -66,7 +66,7 @@ Now you have to put the generated .crt file on all hosts that will access the Do
 You can either install it for docker only, or to the entire system.
 
 To add it to docker, put it here: `/etc/docker/certs.d/${DOMAIN}/ca.crt` and restart docker.
-Make sure the armada command users have access to this file. E.g. `sudo chmod 755 /etc/docker` may be required.
+Make sure the armada command users have access to this file. E.g. `sudo chmod o+x /etc/docker` may be required.
 
 Adding it to your system differs between distributions.
 
