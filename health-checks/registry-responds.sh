@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 
-status_code=$(curl -s -o /dev/null -w "%{http_code}" localhost/v2/_catalog)
+output=$(curl -s -w "\n%{http_code}" localhost:5001/debug/health)
+status_code=$(echo "$output" | tail -n 1)
 if [[ status_code -ne 200 ]]; then
-    echo "Registry did not respond with HTTP 200"
+    response=$(echo "$output" | head -n -1)
+    echo "Response from dockyard: HTTP $status_code: $response"
     exit 1
 fi
 exit 0
