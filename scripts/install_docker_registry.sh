@@ -26,3 +26,5 @@ make PREFIX=/go clean binaries
 
 mkdir -p /etc/docker/registry/
 cp cmd/registry/config-dev.yml /etc/docker/registry/config.yml
+
+rm -rf /go/src/ /usr/local/go/
