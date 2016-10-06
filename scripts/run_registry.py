@@ -1,10 +1,10 @@
 import os
 import subprocess
 import sys
-from urllib.parse import urlparse
+from urlparse import urlparse
 
-import hermes
 import yaml
+from armada import hermes
 from nested_dict import nested_dict
 
 from config.config_json import get_config_json
@@ -31,7 +31,7 @@ def main():
         user = get_config_json('HTTP_AUTH_USER')
         password = get_config_json('HTTP_AUTH_PASSWORD')
         subprocess.check_output('htpasswd -Bbn "{}" "{}" > /tmp/htpasswd'.format(user, password), shell=True)
-        registry_config['auth']['htpasswd']['realm'] = 'Registry Realm'
+        registry_config['auth']['htpasswd']['realm'] = 'Dockyard'
         registry_config['auth']['htpasswd']['path'] = '/tmp/htpasswd'
 
     if get_config_json('READ_ONLY'):
@@ -64,7 +64,7 @@ def main():
         f.write(yaml.dump(saved_dict, default_flow_style=False))
     sys.stdout.flush()
 
-    command = "/go/bin/registry {}".format(REGISTRY_CONFIG_PATH).split()
+    command = "/go/bin/registry serve {}".format(REGISTRY_CONFIG_PATH).split()
     os.execv(command[0], command)
 
 

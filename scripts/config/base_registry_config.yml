@@ -3,14 +3,22 @@ log:
   fields:
     service: registry
 storage:
-    cache:
-        blobdescriptor: inmemory
+  cache:
+    blobdescriptor: inmemory
+  delete:
+    enabled: true
+  maintenance:
+    uploadpurging:
+      enabled: true
+      age: 48h
+      interval: 24h
+      dryrun: false
 http:
-    addr: :80
-    headers:
-        X-Content-Type-Options: [nosniff]
-    debug:
-      addr: localhost:5001
+  addr: :80
+  headers:
+    X-Content-Type-Options: [nosniff]
+  debug:
+    addr: localhost:5001
 health:
   storagedriver:
     enabled: true

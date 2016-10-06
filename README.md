@@ -61,7 +61,7 @@ To generate such certificate you can use this script:
     DOMAIN=dockyard.initech.com
     openssl req -newkey rsa:4096 -nodes -sha256 -keyout ${DOMAIN}.key -x509 -days 10000 -subj "/CN=${DOMAIN}" -out ${DOMAIN}.crt
 
-Now you have to put the generated .crt file on all hosts that will access the Dockyard.
+Now, you have to put the generated .crt file on all hosts that will access the Dockyard.
 
 You can either install it for docker only, or to the entire system.
 
@@ -137,3 +137,7 @@ E.g.:
 
 SSL certificate files should also be provided by Hermes. Path to them (`SSL_CRT_FILE`, `SSL_KEY_FILE`) is relative to
 `config.json` file.
+
+## Removing image from dockyard
+
+    armada ssh dockyard-v2 remove_image $image_name[:$image_tag]

@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -ex
+
 export GOPATH=/go
 export PATH=$GOPATH/bin:/usr/local/go/bin:$PATH
 
@@ -16,7 +18,7 @@ export DOCKER_BUILDTAGS="include_rados include_oss include_gcs"
 
 mkdir -p $CHECKOUT_DIR
 cd $CHECKOUT_DIR
-git clone -b v2.2.1 --single-branch --depth 1 https://github.com/docker/distribution.git
+git clone -b v2.5.1 --single-branch --depth 1 https://github.com/docker/distribution.git
 
 cd $DISTRIBUTION_DIR
 
