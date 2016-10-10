@@ -2,9 +2,6 @@
 
 set -ex
 
-mkdir -p "$GOPATH/src" "$GOPATH/bin"
-chmod -R 777 "$GOPATH"
-
 apt-get update
 apt-get install -y librados-dev apache2-utils git
 
