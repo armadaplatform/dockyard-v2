@@ -61,7 +61,7 @@ def main():
 
     saved_dict = registry_config.to_dict()
     with open(REGISTRY_CONFIG_PATH, 'w') as f:
-        f.write(yaml.dump(saved_dict, default_flow_style=False))
+        f.write(yaml.safe_dump(saved_dict, default_flow_style=False))
     sys.stdout.flush()
 
     command = "/go/bin/registry serve {}".format(REGISTRY_CONFIG_PATH).split()
