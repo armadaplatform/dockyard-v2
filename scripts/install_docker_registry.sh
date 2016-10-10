@@ -2,9 +2,6 @@
 
 set -ex
 
-export GOPATH=/go
-export PATH=$GOPATH/bin:/usr/local/go/bin:$PATH
-
 mkdir -p "$GOPATH/src" "$GOPATH/bin"
 chmod -R 777 "$GOPATH"
 
@@ -25,6 +22,5 @@ cd $DISTRIBUTION_DIR
 make PREFIX=/go clean binaries
 
 mkdir -p /etc/docker/registry/
-cp cmd/registry/config-dev.yml /etc/docker/registry/config.yml
 
 rm -rf /go/src/ /usr/local/go/

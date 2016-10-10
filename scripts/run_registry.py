@@ -9,7 +9,7 @@ from nested_dict import nested_dict
 
 from config.config_json import get_config_json
 
-REGISTRY_CONFIG_PATH = '/tmp/config.yml'
+REGISTRY_CONFIG_PATH = '/etc/docker/registry/config.yml'
 DEFAULT_STORAGE_PATH = '/repository'
 
 

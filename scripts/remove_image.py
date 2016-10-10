@@ -45,7 +45,7 @@ def main():
     print('Running garbage collector...')
     sys.stdout.flush()
     sys.stderr.flush()
-    os.system('/go/bin/registry garbage-collect /tmp/config.yml')
+    os.system('/go/bin/registry garbage-collect /etc/docker/registry/config.yml')
 
 
 if __name__ == '__main__':
