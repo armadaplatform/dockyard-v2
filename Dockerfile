@@ -15,6 +15,6 @@ RUN ln -s /opt/dockyard-v2/scripts/remove_image.py /usr/local/bin/remove_image
 RUN cp /opt/dockyard-v2/scripts/clean_orphaned_images.sh /usr/local/bin/clean_orphaned_images
 RUN chmod +x /usr/local/bin/clean_orphaned_images
 
-RUN ( crontab -l; { echo "21 02 * * 0 /usr/local/bin/clean_orphaned_images"; } ) | crontab -
+RUN ( crontab -l; { echo "21 2 * * 0 /usr/local/bin/clean_orphaned_images"; } ) | crontab -
 
 EXPOSE 80
