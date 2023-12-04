@@ -1,7 +1,8 @@
-FROM microservice_go
+FROM dockyard.armada.sh/microservice_go_focal
 MAINTAINER Cerebro <cerebro@ganymede.eu>
 
-ENV DOCKYARD_V2_UPDATE_DATE 2016-10-05
+ENV MICROSERVICE_NAME dockyard-v2
+ENV DOCKYARD_V2_UPDATE_DATE 2023-11-29
 
 ADD scripts/install_docker_registry.sh /tmp/
 RUN cd /tmp && chmod +x install_docker_registry.sh && sync && ./install_docker_registry.sh
