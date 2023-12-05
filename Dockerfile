@@ -7,7 +7,7 @@ ENV DOCKYARD_V2_UPDATE_DATE 2023-11-29
 ADD scripts/install_docker_registry.sh /tmp/
 RUN cd /tmp && chmod +x install_docker_registry.sh && sync && ./install_docker_registry.sh
 
-RUN pip install -U armada nested_dict pyyaml
+RUN pip install -U armada nested_dict pyyaml boto3
 
 ADD . /opt/dockyard-v2
 ADD ./supervisor/* /etc/supervisor/conf.d/
